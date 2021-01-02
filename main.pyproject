@@ -1,3 +1,0 @@
-{
-    "files": ["main.py","constants/frameworks_constants.py","main_window.py","utils/frameworks_utils.py",".gitignore","README.md","constants/main_window_constants.py"]
-}

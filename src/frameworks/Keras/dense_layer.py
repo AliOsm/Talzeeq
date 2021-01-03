@@ -12,9 +12,9 @@ class DenseLayer(LayerInterface):
 
     def layer_image(self) -> QtGui.QPolygonF:
         return QtGui.QPolygonF([
-            QtCore.QPointF(-10, 0),
-            QtCore.QPointF(0, 10),
-            QtCore.QPointF(10, 0),
-            QtCore.QPointF(0, -10),
-            QtCore.QPointF(-10, 0),
+            QtCore.QPointF(-20, -20),
+            QtCore.QPointF(100, -20),
+            QtCore.QPointF(100, 20),
+            QtCore.QPointF(-100, 20),
+            QtCore.QPointF(-100, -20),
         ])

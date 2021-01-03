@@ -75,6 +75,12 @@ class DiagramScene(QtWidgets.QGraphicsScene):
             self.removeItem(self.line)
             self.line = None
 
+            if len(start_items) and isinstance(start_items[0], QtWidgets.QGraphicsSimpleTextItem):
+                start_items[0] = start_items[0].parentItem()
+
+            if len(end_items) and isinstance(end_items[0], QtWidgets.QGraphicsSimpleTextItem):
+                end_items[0] = end_items[0].parentItem()
+
             if (
                 len(start_items) and
                 len(end_items) and

@@ -25,15 +25,20 @@ class DiagramItem(QtWidgets.QGraphicsPolygonItem):
         self.context_menu = context_menu
         self.polygon = self.framework_layer.layer_image()
 
-        self.textItem = QtWidgets.QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
-        rect = self.textItem.boundingRect()
-        rect.moveCenter(self.boundingRect().center())
-        self.textItem.setPos(rect.topLeft())
-        self.textItem.test = 12345
+        self.create_text_item()
 
         self.setPolygon(self.polygon)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
+
+    def create_text_item(self):
+        self.textItem = QtWidgets.QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
+        rect = self.textItem.boundingRect()
+        rect.moveCenter(self.boundingRect().center())
+        self.textItem.setPos(rect.topLeft())
+
+    def get_framework_layer(self):
+        return self.framework_layer
 
     def add_arrow(self, arrow):
         self.arrows.append(arrow)

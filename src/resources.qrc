@@ -5,5 +5,6 @@
         <file alias="send_to_back">../assets/images/send_to_back.png</file>
         <file alias="pointer">../assets/images/pointer.png</file>
         <file alias="line_pointer">../assets/images/line_pointer.png</file>
+        <file alias="export">../assets/images/export.png</file>
     </qresource>
 </RCC>

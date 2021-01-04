@@ -14,6 +14,7 @@ from utils import frameworks_utils
 from constants import main_window_constants
 from widgets.diagram_scene import DiagramScene
 from widgets.diagram_item import DiagramItem
+from widgets.arrow import Arrow
 from frameworks.layer_interface import LayerInterface
 
 
@@ -22,6 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
 
         self.create_edit_diagram_actions()
+        self.create_file_menu()
         self.create_edit_menu()
         self.create_frameworks_toolbar()
         self.create_edit_diagram_toolbar()
@@ -67,6 +69,19 @@ class MainWindow(QtWidgets.QMainWindow):
             statusTip='Send item to back',
             triggered=self.send_to_back,
         )
+
+    def create_file_menu(self):
+        self.export_action = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/export'),
+            '&Export',
+            self,
+            shortcut='Ctrl+E',
+            statusTip='Export to Python code',
+            triggered=self.export_diagram,
+        )
+
+        self.file_menu = self.menuBar().addMenu(main_window_constants.FILE_MENU_NAME)
+        self.file_menu.addAction(self.export_action)
 
     def create_edit_menu(self):
         self.edit_menu = self.menuBar().addMenu(main_window_constants.EDIT_MENU_NAME)
@@ -163,6 +178,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.framework_toolbox.addItem(item_widget, main_window_constants.LAYERS)
 
     # Callback methods.
+    def export_diagram(self):
+        nodes = self.get_nodes_from_scene()
+        edges = self.get_edges_from_scene()
+        nodes_mapping = self.create_nodes_mapping(nodes)
+        uni_graph, bi_graph = self.create_graph_from_arrows(nodes, edges, nodes_mapping)
+
+        if not self.is_one_connected_component(bi_graph):
+            # TODO: Show an error message.
+        else:
+            # TODO: Check if the graph has any cycle.
+
     def delete_item(self):
         for item in self.scene.selectedItems():
             if isinstance(item, DiagramItem):
@@ -230,6 +256,41 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_selected_framework(self) -> str:
         return str(self.frameworks_combobox.currentText())
 
+    def get_nodes_from_scene(self) -> List[DiagramItem]:
+        items = self.scene.items()
+        nodes = list(filter(lambda item: isinstance(item, DiagramItem), items))
+
+        return nodes
+
+    def get_edges_from_scene(self) -> List[Arrow]:
+        items = self.scene.items()
+        edges = list(filter(lambda item: isinstance(item, Arrow), items))
+
+        return edges
+
+    def create_nodes_mapping(self, nodes):
+        nodes_mapping = dict()
+
+        for index, node in enumerate(nodes):
+            nodes_mapping[node] = index
+
+        return nodes_mapping
+
+    def create_graph_from_arrows(self, nodes, edges, nodes_mapping) -> List[List[int]]:
+        uni_graph = [list() for _ in range(len(nodes))]
+        bi_graph = [list() for _ in range(len(nodes))]
+
+        for edge in edges:
+            start_item = edge.get_start_item()
+            end_item = edge.get_end_item()
+
+            uni_graph[nodes_mapping[start_item]].append(nodes_mapping[end_item])
+
+            bi_graph[nodes_mapping[start_item]].append(nodes_mapping[end_item])
+            bi_graph[nodes_mapping[end_item]].append(nodes_mapping[start_item])
+
+        return uni_graph, bi_graph
+
     def create_framework_layer_widget(self, framework_layer: LayerInterface) -> QtWidgets.QWidget:
         button = QtWidgets.QToolButton()
         button.setText(framework_layer.layer_name())
@@ -247,3 +308,22 @@ class MainWindow(QtWidgets.QMainWindow):
         widget.setLayout(layout)
 
         return widget
+
+    def is_one_connected_component(self, graph) -> bool:
+        queue = [0]
+        visited = [False for _ in range(len(graph))]
+
+        while len(queue):
+            current_node = queue[0]
+            queue.pop(0)
+
+            if visited[current_node]:
+                continue
+            visited[current_node] = True
+
+            for child in graph[current_node]:
+                queue.append(child)
+
+        if sum(visited) != len(visited):
+            return False
+        return True

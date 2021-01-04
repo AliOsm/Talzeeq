@@ -1,1 +1,1 @@
-pyrcc5 resources.qrc -o resources_rc.py
+pyrcc5 src/resources.qrc -o src/resources_rc.py

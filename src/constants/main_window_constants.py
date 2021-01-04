@@ -1,5 +1,7 @@
 MAIN_WINDOW_TITLE = 'Talzeeq'
 
+FILE_MENU_NAME = '&File'
+
 EDIT_MENU_NAME = '&Edit'
 
 FRAMEWORKS_TOOLBAR_NAME = 'Frameworks'

@@ -91,7 +91,7 @@ class Arrow(QtWidgets.QGraphicsLineItem):
         self.setLine(QtCore.QLineF(intersect_point, start_item.pos()))
         line = self.line()
 
-        angle = math.acos(line.dx() / line.length())
+        angle = math.acos(line.dx() / max(1, line.length()))
         if line.dy() >= 0:
             angle = (math.pi * 2.0) - angle
 

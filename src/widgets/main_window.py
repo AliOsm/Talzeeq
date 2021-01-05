@@ -180,13 +180,18 @@ class MainWindow(QtWidgets.QMainWindow):
     # Callback methods.
     def export_diagram(self):
         nodes = self.get_nodes_from_scene()
+
+        if len(nodes) == 0:
+            return
+
         edges = self.get_edges_from_scene()
         nodes_mapping = self.create_nodes_mapping(nodes)
         uni_graph, bi_graph = self.create_graph_from_arrows(nodes, edges, nodes_mapping)
 
         if not self.is_one_connected_component(bi_graph):
-            # TODO: Show an error message.
+            self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG)
         else:
+            pass
             # TODO: Check if the graph has any cycle.
 
     def delete_item(self):
@@ -275,6 +280,14 @@ class MainWindow(QtWidgets.QMainWindow):
             nodes_mapping[node] = index
 
         return nodes_mapping
+
+    def show_model_graph_eval_error_msg(self, message):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setText(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
+        msg.setInformativeText(message)
+        msg.setWindowTitle(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
+        msg.exec_()
 
     def create_graph_from_arrows(self, nodes, edges, nodes_mapping) -> List[List[int]]:
         uni_graph = [list() for _ in range(len(nodes))]

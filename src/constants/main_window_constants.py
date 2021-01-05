@@ -26,4 +26,6 @@ MODEL_GRAPH_EVAL_ERROR_MSG_TITLE = 'Model Graph Evaluation Error'
 
 MODEL_GRAPH_EVAL_ERROR_MSG_TEXT = 'Error while evaluating the model graph!'
 
-MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG = 'Your model graph has more than one single connected component.\nMake sure to solve this problem by connecting all graph components correctly.'
+MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG = 'Your model\'s graph has more than one single connected component.\nMake sure to solve this problem by connecting all graph components correctly.'
+
+MODEL_GRAPH_CYCLE_ERROR_MSG = 'Your model\'s graph has one or more cycles.\nMake sure to solve this problem by remove any cycle in your graph.'

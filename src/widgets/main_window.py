@@ -186,13 +186,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         edges = self.get_edges_from_scene()
         nodes_mapping = self.create_nodes_mapping(nodes)
-        uni_graph, bi_graph = self.create_graph_from_arrows(nodes, edges, nodes_mapping)
+        uni_graph, bi_graph = self.create_model_graph(nodes, edges, nodes_mapping)
 
         if not self.is_one_connected_component(bi_graph):
             self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG)
         else:
-            pass
-            # TODO: Check if the graph has any cycle.
+            topological_sort = self.create_graph_topological_sort(uni_graph)
+            if topological_sort is None:
+                self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_CYCLE_ERROR_MSG)
+            else:
+                # TODO: Build the actual code.
 
     def delete_item(self):
         for item in self.scene.selectedItems():
@@ -289,7 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
         msg.setWindowTitle(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.exec_()
 
-    def create_graph_from_arrows(self, nodes, edges, nodes_mapping) -> List[List[int]]:
+    def create_model_graph(self, nodes, edges, nodes_mapping) -> List[List[int]]:
         uni_graph = [list() for _ in range(len(nodes))]
         bi_graph = [list() for _ in range(len(nodes))]
 
@@ -340,3 +343,30 @@ class MainWindow(QtWidgets.QMainWindow):
         if sum(visited) != len(visited):
             return False
         return True
+
+    def create_graph_topological_sort(self, graph) -> List[int]:
+        nodes_in = [0] * len(graph)
+        for node in range(len(graph)):
+            for child in graph[node]:
+                nodes_in[child] += 1
+
+        queue = list()
+        for index, node_in in enumerate(nodes_in):
+            if node_in == 0:
+                queue.append(index)
+
+        topological_sort = list()
+        while len(queue):
+            current_node = queue[0]
+            queue.pop(0)
+            topological_sort.append(current_node)
+
+            for child in graph[current_node]:
+                nodes_in[child] -= 1
+                if nodes_in[child] == 0:
+                    queue.append(child)
+
+        if len(topological_sort) != len(graph):
+            return None
+
+        return topological_sort

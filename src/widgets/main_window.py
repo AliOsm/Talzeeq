@@ -195,7 +195,22 @@ class MainWindow(QtWidgets.QMainWindow):
             if topological_sort is None:
                 self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_CYCLE_ERROR_MSG)
             else:
-                # TODO: Build the actual code.
+                framework_template = frameworks_utils.get_framework_template(self.get_selected_framework())
+                layers_definition = self.build_layers_definition(nodes, topological_sort)
+                model_connections = self.build_model_connections(nodes, uni_graph, topological_sort)
+                framework_template = framework_template.format(layers_definition, model_connections)
+
+                file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                    self,
+                    'Export Model As',
+                    'talzeeq.py',
+                    'Python Language (*.py);;'
+                    'All files (*.*)',
+                )
+
+                if file_path:
+                    with open(file_path, 'w') as fp:
+                        fp.write(framework_template)
 
     def delete_item(self):
         for item in self.scene.selectedItems():
@@ -261,6 +276,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def are_scene_items_selected(self) -> bool:
         return bool(self.scene.selectedItems())
 
+    def is_root_node(self, uni_graph, elem) -> bool:
+        for node in range(len(uni_graph)):
+            if elem in uni_graph[node]:
+                return False
+
+        return True
+
     def get_selected_framework(self) -> str:
         return str(self.frameworks_combobox.currentText())
 
@@ -306,6 +328,31 @@ class MainWindow(QtWidgets.QMainWindow):
             bi_graph[nodes_mapping[end_item]].append(nodes_mapping[start_item])
 
         return uni_graph, bi_graph
+
+    def build_layers_definition(self, nodes, topological_sort) -> str:
+        layers_code = list()
+
+        for elem in topological_sort:
+            layers_code.append(nodes[elem].get_framework_layer().layer_definition())
+
+        return '\n'.join(layers_code)
+
+    def build_model_connections(self, nodes, uni_graph, topological_sort) -> str:
+        model_connections = list()
+
+        for elem in topological_sort:
+            parents = list()
+            is_root = list()
+            for node in range(len(uni_graph)):
+                if elem in uni_graph[node]:
+                    parents.append(nodes[node].get_framework_layer())
+                    is_root.append(self.is_root_node(uni_graph, node))
+
+            layer_connections = nodes[elem].get_framework_layer().layer_connections(parents, is_root)
+            if layer_connections:
+                model_connections.append(layer_connections)
+
+        return '\n'.join(model_connections)
 
     def create_framework_layer_widget(self, framework_layer: LayerInterface) -> QtWidgets.QWidget:
         button = QtWidgets.QToolButton()

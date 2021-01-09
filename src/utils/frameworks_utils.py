@@ -1,4 +1,6 @@
 # Built-in imports.
+import os
+
 from typing import List
 
 # First-party package imports.
@@ -20,3 +22,7 @@ def get_framework_layers(framework_name: str) -> List[LayerInterface]:
 
 def get_framework_layer_index(framework_name: str, layer_class: LayerInterface) -> int:
 	return get_framework_layers(framework_name).index(layer_class)
+
+
+def get_framework_template(framework_name: str) -> str:
+	return open(os.path.join('./src/frameworks', framework_name, 'template.py'), 'r').read()

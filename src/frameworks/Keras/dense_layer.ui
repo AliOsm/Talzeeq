@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DenseLayer</class>
+ <widget class="QDialog" name="DenseLayer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>350</width>
+    <height>162</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Dense Layer</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="objectNameLabel">
+       <property name="text">
+        <string>Object Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="objectNameLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="unitsLabel">
+       <property name="text">
+        <string>Units</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="unitsSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>999999</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="activationLabel">
+       <property name="text">
+        <string>Activation</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="activationComboBox">
+       <item>
+        <property name="text">
+         <string>elu</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>exponential</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>gelu</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hard_sigmoid</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>linear</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>relu</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>selu</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>sigmoid</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>softmax</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>softplus</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>softsign</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>swish</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tanh</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="useBiasLabel">
+       <property name="text">
+        <string>Use Bias</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="useBiasCheckBox"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>objectNameLineEdit</tabstop>
+  <tabstop>unitsSpinBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DenseLayer</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DenseLayer</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

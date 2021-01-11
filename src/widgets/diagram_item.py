@@ -2,22 +2,21 @@
 from typing import List
 
 # Third-party package imports.
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QGraphicsItem,
+    QGraphicsPolygonItem,
+    QGraphicsSceneContextMenuEvent,
+    QGraphicsSimpleTextItem,
+    QMenu,
+    QWidget,
+)
 
 # First-party package imports.
 from frameworks.layer_interface import LayerInterface
 
 
-class DiagramItem(QtWidgets.QGraphicsPolygonItem):
-    def __init__(
-        self,
-        framework_layer: LayerInterface,
-        context_menu: QtWidgets.QMenu,
-        parent: QtWidgets.QWidget = None,
-    ):
+class DiagramItem(QGraphicsPolygonItem):
+    def __init__(self, framework_layer: LayerInterface, context_menu: QMenu, parent: QGraphicsItem = None):
         super(DiagramItem, self).__init__(parent)
 
         self.arrows = list()
@@ -28,11 +27,11 @@ class DiagramItem(QtWidgets.QGraphicsPolygonItem):
         self.create_text_item()
 
         self.setPolygon(self.polygon)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
     def create_text_item(self):
-        self.textItem = QtWidgets.QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
+        self.textItem = QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
         rect = self.textItem.boundingRect()
         rect.moveCenter(self.boundingRect().center())
         self.textItem.setPos(rect.topLeft())
@@ -61,13 +60,13 @@ class DiagramItem(QtWidgets.QGraphicsPolygonItem):
     def mouseDoubleClickEvent(self, event):
         self.framework_layer.layer_config_dialog()
 
-    def contextMenuEvent(self, event: QtWidgets.QGraphicsSceneContextMenuEvent):
+    def contextMenuEvent(self, event: QGraphicsSceneContextMenuEvent):
         self.scene().clearSelection()
         self.setSelected(True)
         self.context_menu.exec_(event.screenPos())
 
     def itemChange(self, change: int, value: int) -> int:
-        if change == QtWidgets.QGraphicsItem.ItemPositionChange:
+        if change == QGraphicsItem.ItemPositionChange:
             for arrow in self.arrows:
                 arrow.updatePosition()
 

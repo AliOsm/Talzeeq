@@ -2,10 +2,25 @@
 from typing import List
 
 # Third-party package imports.
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (
+    QAction,
+    QButtonGroup,
+    QComboBox,
+    QFileDialog,
+    QGraphicsView,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QSizePolicy,
+    QToolBox,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 # First-party package imports.
 import resources_rc
@@ -18,7 +33,7 @@ from widgets.arrow import Arrow
 from frameworks.layer_interface import LayerInterface
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
@@ -31,11 +46,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_diagram_scene_and_view()
         self.create_framework_toolbox()
 
-        self.layout = QtWidgets.QHBoxLayout()
+        self.layout = QHBoxLayout()
         self.layout.addWidget(self.framework_toolbox)
         self.layout.addWidget(self.view)
 
-        self.widget = QtWidgets.QWidget()
+        self.widget = QWidget()
         self.widget.setLayout(self.layout)
 
         self.setWindowTitle(main_window_constants.MAIN_WINDOW_TITLE)
@@ -43,8 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Create methods.
     def create_edit_diagram_actions(self):
-        self.delete_action = QtWidgets.QAction(
-            QtGui.QIcon(':/icons/delete'),
+        self.delete_action = QAction(
+            QIcon(':/icons/delete'),
             '&Delete',
             self,
             shortcut='Delete',
@@ -52,8 +67,8 @@ class MainWindow(QtWidgets.QMainWindow):
             triggered=self.delete_item,
         )
 
-        self.to_front_action = QtWidgets.QAction(
-            QtGui.QIcon(':/icons/bring_to_front'),
+        self.to_front_action = QAction(
+            QIcon(':/icons/bring_to_front'),
             'Bring to &Front',
             self,
             shortcut='Ctrl+F',
@@ -61,8 +76,8 @@ class MainWindow(QtWidgets.QMainWindow):
             triggered=self.bring_to_front,
         )
 
-        self.send_back_action = QtWidgets.QAction(
-            QtGui.QIcon(':/icons/send_to_back'),
+        self.send_back_action = QAction(
+            QIcon(':/icons/send_to_back'),
             'Send to &Back',
             self,
             shortcut='Ctrl+B',
@@ -71,8 +86,8 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
     def create_file_menu(self):
-        self.export_action = QtWidgets.QAction(
-            QtGui.QIcon(':/icons/export'),
+        self.export_action = QAction(
+            QIcon(':/icons/export'),
             '&Export',
             self,
             shortcut='Ctrl+E',
@@ -91,9 +106,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.send_back_action)
 
     def create_frameworks_toolbar(self):
-        self.frameworks_label = QtWidgets.QLabel(main_window_constants.FRAMEWORKS_LABEL)
+        self.frameworks_label = QLabel(main_window_constants.FRAMEWORKS_LABEL)
 
-        self.frameworks_combobox = QtWidgets.QComboBox()
+        self.frameworks_combobox = QComboBox()
         self.frameworks_combobox.setEditable(False)
         for framework in frameworks_utils.get_sorted_frameworks_list():
             self.frameworks_combobox.addItem(framework)
@@ -109,21 +124,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.edit_diagram_toolbar.addAction(self.send_back_action)
 
     def create_pointer_toolbar(self):
-        pointer_button = QtWidgets.QToolButton()
+        pointer_button = QToolButton()
         pointer_button.setCheckable(True)
         pointer_button.setChecked(True)
-        pointer_button.setIcon(QtGui.QIcon(':/icons/pointer'))
+        pointer_button.setIcon(QIcon(':/icons/pointer'))
 
-        line_pointer_button = QtWidgets.QToolButton()
+        line_pointer_button = QToolButton()
         line_pointer_button.setCheckable(True)
-        line_pointer_button.setIcon(QtGui.QIcon(':/icons/line_pointer'))
+        line_pointer_button.setIcon(QIcon(':/icons/line_pointer'))
 
-        self.pointer_type_group = QtWidgets.QButtonGroup()
+        self.pointer_type_group = QButtonGroup()
         self.pointer_type_group.addButton(pointer_button, DiagramScene.move_item)
         self.pointer_type_group.addButton(line_pointer_button, DiagramScene.insert_line)
         self.pointer_type_group.buttonClicked[int].connect(self.pointer_group_clicked)
 
-        self.scene_scale_combo = QtWidgets.QComboBox()
+        self.scene_scale_combo = QComboBox()
         self.scene_scale_combo.addItems(main_window_constants.DIAGRAM_SCENE_SCALES)
         self.scene_scale_combo.setCurrentIndex(
             main_window_constants.DIAGRAM_SCENE_SCALES.index(
@@ -139,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_diagram_scene_and_view(self):
         self.scene = DiagramScene(self.edit_menu)
-        self.scene.setSceneRect(QtCore.QRectF(
+        self.scene.setSceneRect(QRectF(
             0,
             0,
             main_window_constants.DIAGRAM_SCENE_SIZE,
@@ -148,30 +163,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.scene.item_inserted.connect(self.item_inserted)
 
-        self.view = QtWidgets.QGraphicsView(self.scene)
+        self.view = QGraphicsView(self.scene)
 
     def create_framework_toolbox(self):
         framework_layers = frameworks_utils.get_framework_layers(self.get_selected_framework())
 
-        self.framework_layers_button_group = QtWidgets.QButtonGroup()
+        self.framework_layers_button_group = QButtonGroup()
         self.framework_layers_button_group.setExclusive(False)
         self.framework_layers_button_group.buttonClicked[int].connect(self.framework_layers_button_group_clicked)
 
-        layout = QtWidgets.QGridLayout()
+        layout = QGridLayout()
         for framework_layer in framework_layers:
             layout.addWidget(self.create_framework_layer_widget(framework_layer()))
 
         layout.setRowStretch(3, 10)
         layout.setColumnStretch(2, 10)
 
-        item_widget = QtWidgets.QWidget()
+        item_widget = QWidget()
         item_widget.setLayout(layout)
 
-        self.framework_toolbox = QtWidgets.QToolBox()
+        self.framework_toolbox = QToolBox()
         self.framework_toolbox.setSizePolicy(
-            QtWidgets.QSizePolicy(
-                QtWidgets.QSizePolicy.Maximum,
-                QtWidgets.QSizePolicy.Ignored,
+            QSizePolicy(
+                QSizePolicy.Maximum,
+                QSizePolicy.Ignored,
             )
         )
         self.framework_toolbox.setMinimumWidth(item_widget.sizeHint().width())
@@ -200,7 +215,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 model_connections = self.build_model_connections(nodes, uni_graph, topological_sort)
                 framework_template = framework_template.format(layers_definition, model_connections)
 
-                file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                file_path, _ = QFileDialog.getSaveFileName(
                     self,
                     'Export Model As',
                     'talzeeq.py',
@@ -307,8 +322,8 @@ class MainWindow(QtWidgets.QMainWindow):
         return nodes_mapping
 
     def show_model_graph_eval_error_msg(self, message):
-        msg = QtWidgets.QMessageBox()
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
         msg.setText(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.setInformativeText(message)
         msg.setWindowTitle(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
@@ -354,8 +369,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return '\n'.join(model_connections)
 
-    def create_framework_layer_widget(self, framework_layer: LayerInterface) -> QtWidgets.QWidget:
-        button = QtWidgets.QToolButton()
+    def create_framework_layer_widget(self, framework_layer: LayerInterface) -> QWidget:
+        button = QToolButton()
         button.setText(framework_layer.layer_name())
         button.setCheckable(True)
         layer_index = frameworks_utils.get_framework_layer_index(
@@ -364,10 +379,10 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.framework_layers_button_group.addButton(button, layer_index)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(button)
 
-        widget = QtWidgets.QWidget()
+        widget = QWidget()
         widget.setLayout(layout)
 
         return widget

@@ -1,11 +1,22 @@
 # Built-in imports.
 import abc
 
+from typing import List
+
 # Third-party package imports.
-from PyQt5 import QtGui
+from PyQt5.QtCore import QPointF
+from PyQt5.QtGui import QPolygonF
 
 
 class LayerInterface(object, metaclass=abc.ABCMeta):
+    BASIC_LAYER_IMAGE = QPolygonF([
+        QPointF(-20, -20),
+        QPointF(100, -20),
+        QPointF(100, 20),
+        QPointF(-100, 20),
+        QPointF(-100, -20),
+    ])
+
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
@@ -29,7 +40,7 @@ class LayerInterface(object, metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def layer_image(self) -> QtGui.QPolygonF:
+    def layer_image(self) -> QPolygonF:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -37,7 +48,7 @@ class LayerInterface(object, metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def layer_connections(self, parents, is_root) -> str:
+    def layer_connections(self, parents: List['LayerInterface'], is_root: List[bool]) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod

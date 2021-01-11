@@ -1,8 +1,15 @@
 # Third-party package imports.
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QLineF, pyqtSignal
+from PyQt5.QtGui import QPen
+from PyQt5.QtWidgets import (
+    QGraphicsItem,
+    QGraphicsLineItem,
+    QGraphicsScene,
+    QGraphicsSceneMouseEvent,
+    QGraphicsSimpleTextItem,
+    QMenu,
+    QWidget,
+)
 
 # First-party package imports.
 from utils import frameworks_utils
@@ -10,12 +17,12 @@ from widgets.arrow import Arrow
 from widgets.diagram_item import DiagramItem
 
 
-class DiagramScene(QtWidgets.QGraphicsScene):
+class DiagramScene(QGraphicsScene):
     insert_item, insert_line, move_item = range(3)
 
-    item_inserted = QtCore.pyqtSignal(DiagramItem)
+    item_inserted = pyqtSignal(DiagramItem)
 
-    def __init__(self, context_menu: QtWidgets.QMenu, parent: QtWidgets.QWidget = None):
+    def __init__(self, context_menu: QMenu, parent: QGraphicsItem = None):
         super(DiagramScene, self).__init__(parent)
 
         self.context_menu = context_menu
@@ -37,7 +44,7 @@ class DiagramScene(QtWidgets.QGraphicsScene):
     def set_item_type(self, item_type: int):
         self.item_type = item_type
 
-    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         if event.button() != Qt.LeftButton:
             return
 
@@ -49,20 +56,20 @@ class DiagramScene(QtWidgets.QGraphicsScene):
             self.addItem(item)
             self.item_inserted.emit(item)
         elif self.mode == self.insert_line:
-            self.line = QtWidgets.QGraphicsLineItem(QtCore.QLineF(event.scenePos(), event.scenePos()))
-            self.line.setPen(QtGui.QPen(self.line_color, 2))
+            self.line = QGraphicsLineItem(QLineF(event.scenePos(), event.scenePos()))
+            self.line.setPen(QPen(self.line_color, 2))
             self.addItem(self.line)
 
         super(DiagramScene, self).mousePressEvent(event)
 
-    def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         if self.mode == self.insert_line and self.line:
-            new_line = QtCore.QLineF(self.line.line().p1(), event.scenePos())
+            new_line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(new_line)
         elif self.mode == self.move_item:
             super(DiagramScene, self).mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.mode == self.insert_line and self.line:
             start_items = self.items(self.line.line().p1())
             if len(start_items) and start_items[0] == self.line:
@@ -75,10 +82,10 @@ class DiagramScene(QtWidgets.QGraphicsScene):
             self.removeItem(self.line)
             self.line = None
 
-            if len(start_items) and isinstance(start_items[0], QtWidgets.QGraphicsSimpleTextItem):
+            if len(start_items) and isinstance(start_items[0], QGraphicsSimpleTextItem):
                 start_items[0] = start_items[0].parentItem()
 
-            if len(end_items) and isinstance(end_items[0], QtWidgets.QGraphicsSimpleTextItem):
+            if len(end_items) and isinstance(end_items[0], QGraphicsSimpleTextItem):
                 end_items[0] = end_items[0].parentItem()
 
             if (

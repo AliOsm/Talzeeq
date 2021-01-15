@@ -6,8 +6,7 @@ from PyQt5.QtGui import QIcon
 
 
 class QActionProperties(object):
-    """Class to hold QAction properties.
-    """
+    """Class to hold QAction properties."""
 
     def __init__(self, name: str, icon: QIcon, text: str, shortcut: str, status_tip: str, triggered: Callable):
         self.name = name

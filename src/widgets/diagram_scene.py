@@ -106,9 +106,8 @@ class DiagramScene(QGraphicsScene):
         self.line = None
         super(DiagramScene, self).mouseReleaseEvent(event)
 
-    def isItemChange(self, type_: DiagramItem):
+    def isItemChange(self, type_: DiagramItem) -> bool:
         for item in self.selectedItems():
             if isinstance(item, type_):
                 return True
-
         return False

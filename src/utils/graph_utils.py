@@ -25,13 +25,13 @@ def create_graph_from_qt_elements(
     """Generates a uni-directional graph from the given DiagramItem(s) and Arrow(s).
 
     Args:
-        nodes: A list of DiagramItem(s) to be used as graph nodes.
-        edges: A list of Arrow(s) to be used as graph edges.
-        nodes_mapping: A dictionary of mappings from a DiagramItem to an integer.
-        is_bi_directional: A boolean indicates whether to build uni-directional or bi-directional graph.
+        nodes: List of DiagramItem(s) to be used as graph nodes.
+        edges: List of Arrow(s) to be used as graph edges.
+        nodes_mapping: Dictionary of mappings from a DiagramItem to an integer.
+        is_bi_directional: Boolean indicates whether to build uni-directional or bi-directional graph.
 
     Returns:
-        A uni/bi-directional graph represented in adjacency list format.
+        Uni/Bi-directional graph represented in adjacency list format.
     """
 
     graph = [list() for _ in range(len(nodes))]
@@ -51,8 +51,8 @@ def is_root_node(graph: List[List[int]], element: int) -> bool:
     """Checks if the given element is a root node in the given graph or not.
 
     Args:
-        graph: A graph represented in adjacency list format.
-        element: An integer represents the node that should be checked if it is root or not.
+        graph: Graph represented in adjacency list format.
+        element: Integer represents the node that should be checked if it is root or not.
 
     Returns:
         If the given element is a root node, then the returned value is True. False otherwise.
@@ -70,7 +70,7 @@ def is_one_connected_component(graph: List[List[int]]) -> bool:
     Reference: https://www.geeksforgeeks.org/connected-components-in-an-undirected-graph.
 
     Args:
-        graph: A bi-directional graph represented in adjacency list format.
+        graph: Bi-directional graph represented in adjacency list format.
 
     Returns:
         If the given graph is one connected component, then the returned value is True. False otherwise.
@@ -101,7 +101,7 @@ def create_graph_topological_sort(graph: List[List[int]]) -> Union[List[int], bo
     Reference: https://www.geeksforgeeks.org/topological-sorting-indegree-based-solution.
 
     Args:
-        graph: A directed acyclic graph (DAG) represented in adjacency list format.
+        graph: Directed acyclic graph (DAG) represented in adjacency list format.
 
     Returns:
         If the given graph is valid, then the returned value is a list contains the graph nodes sorted topologically.

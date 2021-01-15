@@ -1,3 +1,6 @@
+# Built-in imports.
+from typing import List
+
 # Third-party package imports.
 from PyQt5.QtWidgets import (
     QGraphicsItem,
@@ -18,24 +21,23 @@ class DiagramItem(QGraphicsPolygonItem):
         self.arrows = list()
         self.framework_layer = framework_layer
         self.context_menu = context_menu
-        self.polygon = self.framework_layer.layer_image()
 
         self.create_text_item()
 
-        self.setPolygon(self.polygon)
+        self.setPolygon(self.framework_layer.layer_image())
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
     def create_text_item(self):
-        self.textItem = QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
-        rect = self.textItem.boundingRect()
+        self.text_item = QGraphicsSimpleTextItem(self.framework_layer.layer_name(), self)
+        rect = self.text_item.boundingRect()
         rect.moveCenter(self.boundingRect().center())
-        self.textItem.setPos(rect.topLeft())
+        self.text_item.setPos(rect.topLeft())
 
-    def get_arrows(self):
+    def get_arrows(self) -> List['Arrow']:
         return self.arrows
 
-    def get_framework_layer(self):
+    def get_framework_layer(self) -> LayerInterface:
         return self.framework_layer
 
     def add_arrow(self, arrow):
@@ -65,5 +67,4 @@ class DiagramItem(QGraphicsPolygonItem):
         if change == QGraphicsItem.ItemPositionChange:
             for arrow in self.arrows:
                 arrow.updatePosition()
-
         return value

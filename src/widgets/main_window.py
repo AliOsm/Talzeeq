@@ -1,5 +1,5 @@
 # Built-in imports.
-from typing import List
+from typing import List, Dict
 
 # Third-party package imports.
 from PyQt5.QtCore import QRectF
@@ -41,6 +41,14 @@ class MainWindow(QMainWindow):
         
         self.create_main_window_actions([
             QActionProperties(
+                name=main_window_constants.EXPORT_ACTION_NAME,
+                icon=QIcon(':/icons/export'),
+                text='&Export',
+                shortcut='Ctrl+E',
+                status_tip='Export to Python code',
+                triggered=self.export_diagram,
+            ),
+            QActionProperties(
                 name=main_window_constants.DELETE_ACTON_NAME,
                 icon=QIcon(':/icons/delete'),
                 text='&Delete',
@@ -63,14 +71,6 @@ class MainWindow(QMainWindow):
                 shortcut='Ctrl+B',
                 status_tip='Send item to back',
                 triggered=self.send_to_back,
-            ),
-            QActionProperties(
-                name=main_window_constants.EXPORT_ACTION_NAME,
-                icon=QIcon(':/icons/export'),
-                text='&Export',
-                shortcut='Ctrl+E',
-                status_tip='Export to Python code',
-                triggered=self.export_diagram,
             ),
         ])
 
@@ -149,31 +149,24 @@ class MainWindow(QMainWindow):
         self.pointer_type_group.addButton(line_pointer_button, DiagramScene.insert_line)
         self.pointer_type_group.buttonClicked[int].connect(self.pointer_group_clicked)
 
-        self.scene_scale_combo = QComboBox()
-        self.scene_scale_combo.addItems(main_window_constants.DIAGRAM_SCENE_SCALES)
-        self.scene_scale_combo.setCurrentIndex(
-            main_window_constants.DIAGRAM_SCENE_SCALES.index(
-                main_window_constants.DIAGRAM_SCENE_DEFAULT_SCALE
-            )
+        scene_scale_combo = QComboBox()
+        scene_scale_combo.addItems(main_window_constants.DIAGRAM_SCENE_SCALES)
+        scene_scale_combo.setCurrentIndex(
+            main_window_constants.DIAGRAM_SCENE_SCALES.index(main_window_constants.DIAGRAM_SCENE_DEFAULT_SCALE)
         )
-        self.scene_scale_combo.currentIndexChanged[str].connect(self.scene_scale_changed)
+        scene_scale_combo.currentIndexChanged[str].connect(self.scene_scale_changed)
 
         self.pointer_toolbar = self.addToolBar(main_window_constants.POINTER_TYPE_TOOLBAR_NAME)
         self.pointer_toolbar.addWidget(pointer_button)
         self.pointer_toolbar.addWidget(line_pointer_button)
-        self.pointer_toolbar.addWidget(self.scene_scale_combo)
+        self.pointer_toolbar.addWidget(scene_scale_combo)
 
     def create_diagram_scene_and_view(self):
         self.scene = DiagramScene(self.edit_menu)
-        self.scene.setSceneRect(QRectF(
-            0,
-            0,
-            main_window_constants.DIAGRAM_SCENE_SIZE,
-            main_window_constants.DIAGRAM_SCENE_SIZE,
-        ))
-
+        self.scene.setSceneRect(
+            QRectF(0, 0, main_window_constants.DIAGRAM_SCENE_SIZE, main_window_constants.DIAGRAM_SCENE_SIZE)
+        )
         self.scene.item_inserted.connect(self.item_inserted)
-
         self.view = QGraphicsView(self.scene)
 
     def create_framework_toolbox(self):
@@ -198,7 +191,7 @@ class MainWindow(QMainWindow):
             QSizePolicy(
                 QSizePolicy.Maximum,
                 QSizePolicy.Ignored,
-            )
+            ),
         )
         self.framework_toolbox.setMinimumWidth(item_widget.sizeHint().width())
         self.framework_toolbox.addItem(item_widget, main_window_constants.LAYERS)
@@ -214,30 +207,34 @@ class MainWindow(QMainWindow):
         nodes_mapping = self.create_nodes_mapping(nodes)
         uni_graph = graph_utils.create_graph_from_qt_elements(nodes, edges, nodes_mapping)
         bi_graph = graph_utils.create_graph_from_qt_elements(nodes, edges, nodes_mapping, is_bi_directional=True)
+        
+        is_one_connected_component = graph_utils.is_one_connected_component(bi_graph)
+        graph_topological_sort = graph_utils.create_graph_topological_sort(uni_graph)
 
-        if not graph_utils.is_one_connected_component(bi_graph):
+        if not is_one_connected_component:
             self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG)
+        elif graph_topological_sort is None:
+            self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_CYCLE_ERROR_MSG)
         else:
-            topological_sort = graph_utils.create_graph_topological_sort(uni_graph)
-            if topological_sort is None:
-                self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_CYCLE_ERROR_MSG)
-            else:
-                framework_template = frameworks_utils.get_framework_template(self.get_selected_framework())
-                layers_definition = self.build_layers_definition(nodes, topological_sort)
-                model_connections = self.build_model_connections(nodes, uni_graph, topological_sort)
-                framework_template = framework_template.format(layers_definition, model_connections)
+            layer_definitions = self.build_layer_definitions(nodes, graph_topological_sort)
+            model_connections = self.build_model_connections(nodes, uni_graph, graph_topological_sort)
+            framework_template = frameworks_utils.get_formatted_framework_template(
+                self.get_selected_framework(),
+                layer_definitions,
+                model_connections,
+            )
 
-                file_path, _ = QFileDialog.getSaveFileName(
-                    self,
-                    'Export Model As',
-                    'talzeeq.py',
-                    'Python Language (*.py);;'
-                    'All files (*.*)',
-                )
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                'Export Model As',
+                'talzeeq.py',
+                'Python Language (*.py);;'
+                'All files (*.*)',
+            )
 
-                if file_path:
-                    with open(file_path, 'w') as fp:
-                        fp.write(framework_template)
+            if file_path:
+                with open(file_path, 'w') as fp:
+                    fp.write(framework_template)
 
     def delete_item(self):
         for item in self.scene.selectedItems():
@@ -246,26 +243,20 @@ class MainWindow(QMainWindow):
             self.scene.removeItem(item)
 
     def bring_to_front(self):
-        if self.are_scene_items_selected():
-            for selected_item in self.scene.selectedItems():
-                overlap_items = selected_item.collidingItems()
-
-                z_value = 0
-                for item in overlap_items:
-                    if item.zValue() >= z_value and isinstance(item, DiagramItem):
-                        z_value = item.zValue() + 0.1
-                selected_item.setZValue(z_value)
+        for selected_item in self.scene.selectedItems():
+            z_value = 0
+            for item in selected_item.collidingItems():
+                if item.zValue() >= z_value and isinstance(item, DiagramItem):
+                    z_value = item.zValue() + 0.1
+            selected_item.setZValue(z_value)
 
     def send_to_back(self):
-        if self.are_scene_items_selected():
-            for selected_item in self.scene.selectedItems():
-                overlap_items = selected_item.collidingItems()
-
-                z_value = 0
-                for item in overlap_items:
-                    if item.zValue() <= z_value and isinstance(item, DiagramItem):
-                        z_value = item.zValue() - 0.1
-                selected_item.setZValue(z_value)
+        for selected_item in self.scene.selectedItems():
+            z_value = 0
+            for item in selected_item.collidingItems():
+                if item.zValue() <= z_value and isinstance(item, DiagramItem):
+                    z_value = item.zValue() - 0.1
+            selected_item.setZValue(z_value)
 
     def pointer_group_clicked(self, index: int):
         self.scene.set_mode(self.pointer_type_group.checkedId())
@@ -288,6 +279,7 @@ class MainWindow(QMainWindow):
 
     def framework_layers_button_group_clicked(self, id: int):
         buttons = self.framework_layers_button_group.buttons()
+
         for button in buttons:
             if self.framework_layers_button_group.button(id) != button:
                 button.setChecked(False)
@@ -300,82 +292,45 @@ class MainWindow(QMainWindow):
             self.scene.set_mode(DiagramScene.move_item)
 
     # Helper methods.
-    def are_scene_items_selected(self) -> bool:
-        return bool(self.scene.selectedItems())
-
-    def is_root_node(self, uni_graph, elem) -> bool:
-        for node in range(len(uni_graph)):
-            if elem in uni_graph[node]:
-                return False
-
-        return True
-
     def get_selected_framework(self) -> str:
         return str(self.frameworks_combobox.currentText())
 
     def get_nodes_from_scene(self) -> List[DiagramItem]:
-        items = self.scene.items()
-        nodes = list(filter(lambda item: isinstance(item, DiagramItem), items))
-
-        return nodes
+        return list(filter(lambda item: isinstance(item, DiagramItem), self.scene.items()))
 
     def get_edges_from_scene(self) -> List[Arrow]:
-        items = self.scene.items()
-        edges = list(filter(lambda item: isinstance(item, Arrow), items))
+        return list(filter(lambda item: isinstance(item, Arrow), self.scene.items()))
 
-        return edges
+    def create_nodes_mapping(self, nodes: List[DiagramItem]) -> Dict[DiagramItem, int]:
+        return { node:index for index, node in enumerate(nodes) }
 
-    def create_nodes_mapping(self, nodes):
-        nodes_mapping = dict()
-
-        for index, node in enumerate(nodes):
-            nodes_mapping[node] = index
-
-        return nodes_mapping
-
-    def show_model_graph_eval_error_msg(self, message):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
+    def show_model_graph_eval_error_msg(self, message: str):
+        msg = QMessageBox().setIcon(QMessageBox.Critical)
         msg.setText(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.setInformativeText(message)
         msg.setWindowTitle(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.exec_()
 
-    def create_model_graph(self, nodes, edges, nodes_mapping) -> List[List[int]]:
-        uni_graph = [list() for _ in range(len(nodes))]
-        bi_graph = [list() for _ in range(len(nodes))]
+    def build_layer_definitions(self, nodes: List[DiagramItem], graph_topological_sort: List[int]) -> str:
+        return '\n'.join([nodes[element].get_framework_layer().layer_definition() for element in graph_topological_sort])
 
-        for edge in edges:
-            start_item = edge.get_start_item()
-            end_item = edge.get_end_item()
-
-            uni_graph[nodes_mapping[start_item]].append(nodes_mapping[end_item])
-
-            bi_graph[nodes_mapping[start_item]].append(nodes_mapping[end_item])
-            bi_graph[nodes_mapping[end_item]].append(nodes_mapping[start_item])
-
-        return uni_graph, bi_graph
-
-    def build_layers_definition(self, nodes, topological_sort) -> str:
-        layers_code = list()
-
-        for elem in topological_sort:
-            layers_code.append(nodes[elem].get_framework_layer().layer_definition())
-
-        return '\n'.join(layers_code)
-
-    def build_model_connections(self, nodes, uni_graph, topological_sort) -> str:
+    def build_model_connections(
+        self,
+        nodes: List[DiagramItem],
+        graph: List[List[int]],
+        graph_topological_sort: List[int],
+    ) -> str:
         model_connections = list()
 
-        for elem in topological_sort:
+        for element in graph_topological_sort:
             parents = list()
             is_root = list()
-            for node in range(len(uni_graph)):
-                if elem in uni_graph[node]:
+            for node in range(len(graph)):
+                if element in graph[node]:
                     parents.append(nodes[node].get_framework_layer())
-                    is_root.append(self.is_root_node(uni_graph, node))
+                    is_root.append(graph_utils.is_root_node(graph, node))
 
-            layer_connections = nodes[elem].get_framework_layer().layer_connections(parents, is_root)
+            layer_connections = nodes[element].get_framework_layer().layer_connections(parents, is_root)
             if layer_connections:
                 model_connections.append(layer_connections)
 
@@ -385,11 +340,13 @@ class MainWindow(QMainWindow):
         button = QToolButton()
         button.setText(framework_layer.layer_name())
         button.setCheckable(True)
-        layer_index = frameworks_utils.get_framework_layer_index(
-            self.get_selected_framework(),
-            framework_layer.__class__,
+        self.framework_layers_button_group.addButton(
+            button,
+            frameworks_utils.get_framework_layer_index(
+                self.get_selected_framework(),
+                framework_layer.__class__,
+            ),
         )
-        self.framework_layers_button_group.addButton(button, layer_index)
 
         layout = QVBoxLayout()
         layout.addWidget(button)

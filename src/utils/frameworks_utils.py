@@ -26,3 +26,7 @@ def get_framework_layer_index(framework_name: str, layer_class: LayerInterface) 
 
 def get_framework_template(framework_name: str) -> str:
 	return open(os.path.join('./src/frameworks', framework_name, 'template.py'), 'r').read()
+
+
+def get_formatted_framework_template(framework_name: str, layer_definitions: str, model_connections: str) -> str:
+    return get_framework_template(framework_name).format(layer_definitions, model_connections)

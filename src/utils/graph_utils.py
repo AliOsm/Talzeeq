@@ -2,6 +2,7 @@
 
 Available methods:
 - create_graph_from_qt_elements.
+- is_root_node.
 - is_one_connected_component.
 - create_graph_topological_sort.
 """
@@ -44,6 +45,23 @@ def create_graph_from_qt_elements(
             graph[nodes_mapping[end_item]].append(nodes_mapping[start_item])
 
     return graph
+
+
+def is_root_node(graph: List[List[int]], element: int) -> bool:
+    """Checks if the given element is a root node in the given graph or not.
+
+    Args:
+        graph: A graph represented in adjacency list format.
+        element: An integer represents the node that should be checked if it is root or not.
+
+    Returns:
+        If the given element is a root node, then the returned value is True. False otherwise.
+    """
+
+    for node in range(len(graph)):
+        if element in graph[node]:
+            return False
+    return True
 
 
 def is_one_connected_component(graph: List[List[int]]) -> bool:

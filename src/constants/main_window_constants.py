@@ -2,7 +2,15 @@ MAIN_WINDOW_TITLE = 'Talzeeq'
 
 FILE_MENU_NAME = '&File'
 
+EXPORT_ACTION_NAME = 'export'
+
 EDIT_MENU_NAME = '&Edit'
+
+DELETE_ACTON_NAME = 'delete'
+
+TO_FRONT_ACTION_NAME = 'to_front'
+
+TO_BACK_ACTION_NAME = 'to_back'
 
 FRAMEWORKS_TOOLBAR_NAME = 'Frameworks'
 

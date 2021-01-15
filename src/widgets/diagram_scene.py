@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import (
     QGraphicsSceneMouseEvent,
     QGraphicsSimpleTextItem,
     QMenu,
-    QWidget,
 )
 
 # First-party package imports.

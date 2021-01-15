@@ -2,7 +2,7 @@
 from typing import List
 
 # Third-party package imports.
-from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QAction,
@@ -31,14 +31,49 @@ from constants import main_window_constants
 from widgets.diagram_scene import DiagramScene
 from widgets.diagram_item import DiagramItem
 from widgets.arrow import Arrow
+from widgets.qaction_properties import QActionProperties
 from frameworks.layer_interface import LayerInterface
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        
+        self.create_main_window_actions([
+            QActionProperties(
+                name=main_window_constants.DELETE_ACTON_NAME,
+                icon=QIcon(':/icons/delete'),
+                text='&Delete',
+                shortcut='Delete',
+                status_tip='Delete item from diagram',
+                triggered=self.delete_item,
+            ),
+            QActionProperties(
+                name=main_window_constants.TO_FRONT_ACTION_NAME,
+                icon=QIcon(':/icons/bring_to_front'),
+                text='Bring to &Front',
+                shortcut='Ctrl+F',
+                status_tip='Bring item to front',
+                triggered=self.bring_to_front,
+            ),
+            QActionProperties(
+                name=main_window_constants.TO_BACK_ACTION_NAME,
+                icon=QIcon(':/icons/send_to_back'),
+                text='Send to &Back',
+                shortcut='Ctrl+B',
+                status_tip='Send item to back',
+                triggered=self.send_to_back,
+            ),
+            QActionProperties(
+                name=main_window_constants.EXPORT_ACTION_NAME,
+                icon=QIcon(':/icons/export'),
+                text='&Export',
+                shortcut='Ctrl+E',
+                status_tip='Export to Python code',
+                triggered=self.export_diagram,
+            ),
+        ])
 
-        self.create_edit_diagram_actions()
         self.create_file_menu()
         self.create_edit_menu()
         self.create_frameworks_toolbar()
@@ -58,53 +93,28 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.widget)
 
     # Create methods.
-    def create_edit_diagram_actions(self):
-        self.delete_action = QAction(
-            QIcon(':/icons/delete'),
-            '&Delete',
-            self,
-            shortcut='Delete',
-            statusTip='Delete item from diagram',
-            triggered=self.delete_item,
-        )
-
-        self.to_front_action = QAction(
-            QIcon(':/icons/bring_to_front'),
-            'Bring to &Front',
-            self,
-            shortcut='Ctrl+F',
-            statusTip='Bring item to front',
-            triggered=self.bring_to_front,
-        )
-
-        self.send_back_action = QAction(
-            QIcon(':/icons/send_to_back'),
-            'Send to &Back',
-            self,
-            shortcut='Ctrl+B',
-            statusTip='Send item to back',
-            triggered=self.send_to_back,
-        )
+    def create_main_window_actions(self, main_window_actions: List[QActionProperties]):
+        self.main_window_actions = dict()
+        for main_window_action in main_window_actions:
+            self.main_window_actions[main_window_action.name] = QAction(
+                main_window_action.icon,
+                main_window_action.text,
+                self,
+                shortcut=main_window_action.shortcut,
+                statusTip=main_window_action.status_tip,
+                triggered=main_window_action.triggered,
+            )
 
     def create_file_menu(self):
-        self.export_action = QAction(
-            QIcon(':/icons/export'),
-            '&Export',
-            self,
-            shortcut='Ctrl+E',
-            statusTip='Export to Python code',
-            triggered=self.export_diagram,
-        )
-
         self.file_menu = self.menuBar().addMenu(main_window_constants.FILE_MENU_NAME)
-        self.file_menu.addAction(self.export_action)
+        self.file_menu.addAction(self.main_window_actions[main_window_constants.EXPORT_ACTION_NAME])
 
     def create_edit_menu(self):
         self.edit_menu = self.menuBar().addMenu(main_window_constants.EDIT_MENU_NAME)
-        self.edit_menu.addAction(self.delete_action)
+        self.edit_menu.addAction(self.main_window_actions[main_window_constants.DELETE_ACTON_NAME])
         self.edit_menu.addSeparator()
-        self.edit_menu.addAction(self.to_front_action)
-        self.edit_menu.addAction(self.send_back_action)
+        self.edit_menu.addAction(self.main_window_actions[main_window_constants.TO_FRONT_ACTION_NAME])
+        self.edit_menu.addAction(self.main_window_actions[main_window_constants.TO_BACK_ACTION_NAME])
 
     def create_frameworks_toolbar(self):
         self.frameworks_label = QLabel(main_window_constants.FRAMEWORKS_LABEL)
@@ -120,9 +130,9 @@ class MainWindow(QMainWindow):
 
     def create_edit_diagram_toolbar(self):
         self.edit_diagram_toolbar = self.addToolBar(main_window_constants.DIAGRAM_EDIT_TOOLBAR_NAME)
-        self.edit_diagram_toolbar.addAction(self.delete_action)
-        self.edit_diagram_toolbar.addAction(self.to_front_action)
-        self.edit_diagram_toolbar.addAction(self.send_back_action)
+        self.edit_diagram_toolbar.addAction(self.main_window_actions[main_window_constants.DELETE_ACTON_NAME])
+        self.edit_diagram_toolbar.addAction(self.main_window_actions[main_window_constants.TO_FRONT_ACTION_NAME])
+        self.edit_diagram_toolbar.addAction(self.main_window_actions[main_window_constants.TO_BACK_ACTION_NAME])
 
     def create_pointer_toolbar(self):
         pointer_button = QToolButton()

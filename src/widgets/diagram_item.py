@@ -1,6 +1,3 @@
-# Built-in imports.
-from typing import List
-
 # Third-party package imports.
 from PyQt5.QtWidgets import (
     QGraphicsItem,
@@ -8,7 +5,6 @@ from PyQt5.QtWidgets import (
     QGraphicsSceneContextMenuEvent,
     QGraphicsSimpleTextItem,
     QMenu,
-    QWidget,
 )
 
 # First-party package imports.

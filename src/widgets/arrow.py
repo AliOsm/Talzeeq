@@ -4,7 +4,7 @@ import math
 # Third-party package imports.
 from PyQt5.QtCore import Qt, QLineF, QPointF, QRectF, QSizeF
 from PyQt5.QtGui import QPen, QPolygonF
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsLineItem, QWidget
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsLineItem
 
 # First-party package imports.
 from widgets.diagram_item import DiagramItem

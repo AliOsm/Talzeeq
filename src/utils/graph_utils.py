@@ -2,7 +2,9 @@
 
 Available methods:
 - create_graph_from_qt_elements.
+- get_root_nodes.
 - is_root_node.
+- is_all_root_nodes_are_input_layers.
 - is_one_connected_component.
 - create_graph_topological_sort.
 """
@@ -47,6 +49,23 @@ def create_graph_from_qt_elements(
     return graph
 
 
+def get_root_nodes(graph: List[List[int]]) -> List[int]:
+    """Given a uni-directional graph, returns the root nodes.
+
+    Args:
+        graph: Uni-directional graph represented in adjacency list format.
+
+    Returns:
+        List represents the root nodes.
+    """
+
+    root_nodes = list()
+    for node in range(len(graph)):
+        if is_root_node(graph, node):
+            root_nodes.append(node)
+    return root_nodes
+
+
 def is_root_node(graph: List[List[int]], element: int) -> bool:
     """Checks if the given element is a root node in the given graph or not.
 
@@ -60,6 +79,23 @@ def is_root_node(graph: List[List[int]], element: int) -> bool:
 
     for node in range(len(graph)):
         if element in graph[node]:
+            return False
+    return True
+
+
+def is_all_root_nodes_are_input_layers(nodes: List[DiagramItem], root_nodes: List[int]) -> bool:
+    """Checks if the given root nodes are all input layers.
+
+    Args:
+        nodes: List of DiagramItem(s) to be used as graph nodes.
+        root_nodes: List of root node indexes.
+
+    Returns:
+        If the given root nodes are all of type input layers, then the returned value is True. False otherwise.
+    """
+
+    for root_node in root_nodes:
+        if not nodes[root_node].get_framework_layer().IS_INPUT_LAYER:
             return False
     return True
 

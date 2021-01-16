@@ -210,16 +210,22 @@ class MainWindow(QMainWindow):
         
         is_one_connected_component = graph_utils.is_one_connected_component(bi_graph)
         graph_topological_sort = graph_utils.create_graph_topological_sort(uni_graph)
+        root_nodes = graph_utils.get_root_nodes(uni_graph)
+        is_all_root_nodes_are_input_layers = graph_utils.is_all_root_nodes_are_input_layers(nodes, root_nodes)
 
         if not is_one_connected_component:
             self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG)
         elif graph_topological_sort is None:
             self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_CYCLE_ERROR_MSG)
+        elif not is_all_root_nodes_are_input_layers:
+            self.show_model_graph_eval_error_msg(main_window_constants.MODEL_GRAPH_ROOT_NODE_IS_NOT_INPUT_ERROR_MSG)
         else:
-            layer_definitions = self.build_layer_definitions(nodes, graph_topological_sort)
-            model_connections = self.build_model_connections(nodes, uni_graph, graph_topological_sort)
+            input_definitions = self.build_input_definitions(map(nodes.__getitem__, root_nodes))
+            layer_definitions = self.build_layer_definitions(nodes, graph_topological_sort, root_nodes)
+            model_connections = self.build_model_connections(nodes, uni_graph, graph_topological_sort, root_nodes)
             framework_template = frameworks_utils.get_formatted_framework_template(
                 self.get_selected_framework(),
+                input_definitions,
                 layer_definitions,
                 model_connections,
             )
@@ -305,20 +311,37 @@ class MainWindow(QMainWindow):
         return { node:index for index, node in enumerate(nodes) }
 
     def show_model_graph_eval_error_msg(self, message: str):
-        msg = QMessageBox().setIcon(QMessageBox.Critical)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
         msg.setText(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.setInformativeText(message)
         msg.setWindowTitle(main_window_constants.MODEL_GRAPH_EVAL_ERROR_MSG_TEXT)
         msg.exec_()
 
-    def build_layer_definitions(self, nodes: List[DiagramItem], graph_topological_sort: List[int]) -> str:
-        return '\n'.join([nodes[element].get_framework_layer().layer_definition() for element in graph_topological_sort])
+    def build_input_definitions(self, root_nodes: List[DiagramItem]) -> str:
+        input_definitions = list()
+        for node in root_nodes:
+            input_definitions.append(node.get_framework_layer().layer_definition())
+        return ', '.join(input_definitions)
+
+    def build_layer_definitions(
+        self,
+        nodes: List[DiagramItem],
+        graph_topological_sort: List[int],
+        root_nodes: List[int],
+    ) -> str:
+        layer_definitions = list()
+        for element in graph_topological_sort:
+            if element not in root_nodes:
+                layer_definitions.append(nodes[element].get_framework_layer().layer_definition())
+        return '\n'.join(layer_definitions)
 
     def build_model_connections(
         self,
         nodes: List[DiagramItem],
         graph: List[List[int]],
         graph_topological_sort: List[int],
+        root_nodes: List[int],
     ) -> str:
         model_connections = list()
 
@@ -328,7 +351,7 @@ class MainWindow(QMainWindow):
             for node in range(len(graph)):
                 if element in graph[node]:
                     parents.append(nodes[node].get_framework_layer())
-                    is_root.append(graph_utils.is_root_node(graph, node))
+                    is_root.append(node in root_nodes)
 
             layer_connections = nodes[element].get_framework_layer().layer_connections(parents, is_root)
             if layer_connections:

@@ -9,6 +9,8 @@ from PyQt5.QtGui import QPolygonF
 
 
 class LayerInterface(object, metaclass=abc.ABCMeta):
+    IS_INPUT_LAYER = False
+
     BASIC_LAYER_IMAGE = QPolygonF([
         QPointF(-20, -20),
         QPointF(100, -20),

@@ -6,7 +6,7 @@ class Talzeeq(tf.keras.Model):
     super(Talzeeq, self).__init__()
 {}
 
-  def call(self, inputs, training=False):
+  def call(self, {}, training=False):
 {}
 
 model = Talzeeq()

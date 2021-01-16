@@ -68,11 +68,17 @@ def get_framework_template(framework_name: str) -> str:
     return open(os.path.join('./src/frameworks', framework_name, 'template.py'), 'r').read()
 
 
-def get_formatted_framework_template(framework_name: str, layer_definitions: str, model_connections: str) -> str:
+def get_formatted_framework_template(
+    framework_name: str,
+    input_definitions: str,
+    layer_definitions: str,
+    model_connections: str,
+) -> str:
     """Formats the framework's template after reading it using the given layer definitions and model connections.
 
     Args:
         framework_name: String represents the name of the framework.
+        input_definitions: String of the input definitions.
         layer_definitions: String of the layer definitions.
         model_connections: String of the model connections.
 
@@ -80,4 +86,4 @@ def get_formatted_framework_template(framework_name: str, layer_definitions: str
         String represents the formatted framework's template.
     """
 
-    return get_framework_template(framework_name).format(layer_definitions, model_connections)
+    return get_framework_template(framework_name).format(layer_definitions, input_definitions, model_connections)

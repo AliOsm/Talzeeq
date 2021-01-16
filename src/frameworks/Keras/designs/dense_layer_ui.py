@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'src/frameworks/Keras/dense_layer.ui'
+# Form implementation generated from reading ui file 'src/frameworks/Keras/designs/dense_layer.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #

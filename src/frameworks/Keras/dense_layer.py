@@ -14,9 +14,9 @@ from frameworks.Keras.designs.dense_layer_ui import Ui_DenseLayer
 
 class DenseLayer(LayerInterface):
     LAYER_DISPLAY_NAME                 = 'Dense Layer'
-    LAYER_DEFINITION                   = '    self.{} = tf.keras.layers.Dense(units={}, activation={}, use_bias={})'
-    ROOT_LAYER_CONNECTION_TEMPLATE     = '    self.{}_output = {}(self.{})'
-    NON_ROOT_LAYER_CONNECTION_TEMPLATE = '    self.{}_output = {}(self.{})'
+    LAYER_DEFINITION                   = '    self.{} = tf.keras.layers.Dense(units={}, activation=\'{}\', use_bias={})'
+    ROOT_LAYER_CONNECTION_TEMPLATE     = '    self.{}_output = self.{}({})'
+    NON_ROOT_LAYER_CONNECTION_TEMPLATE = '    self.{}_output = self.{}(self.{}_output)'
 
     def __init__(self):
         self.object_name = generate_slug(2).replace('-', '_')
@@ -25,13 +25,13 @@ class DenseLayer(LayerInterface):
         self.use_bias    = False
 
     def layer_name(self) -> str:
-        return DenseLayer.LAYER_DISPLAY_NAME
+        return self.LAYER_DISPLAY_NAME
 
     def layer_image(self) -> QPolygonF:
-        return DenseLayer.BASIC_LAYER_IMAGE
+        return self.BASIC_LAYER_IMAGE
 
     def layer_definition(self) -> str:
-        return DenseLayer.LAYER_DEFINITION.format(
+        return self.LAYER_DEFINITION.format(
             self.object_name,
             self.units,
             self.activation,
@@ -43,13 +43,13 @@ class DenseLayer(LayerInterface):
 
         for p, r in zip(parents, is_root):
             if r:
-                layer_connections.append(DenseLayer.ROOT_LAYER_CONNECTION_TEMPLATE.format(
+                layer_connections.append(self.ROOT_LAYER_CONNECTION_TEMPLATE.format(
                     self.object_name,
                     self.object_name,
                     p.object_name,
                 ))
             else:
-                layer_connections.append(DenseLayer.NON_ROOT_LAYER_CONNECTION_TEMPLATE.format(
+                layer_connections.append(self.NON_ROOT_LAYER_CONNECTION_TEMPLATE.format(
                     self.object_name,
                     self.object_name,
                     p.object_name,

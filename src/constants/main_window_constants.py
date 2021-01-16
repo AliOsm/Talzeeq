@@ -37,3 +37,5 @@ MODEL_GRAPH_EVAL_ERROR_MSG_TEXT = 'Error while evaluating the model graph!'
 MODEL_GRAPH_MULTIPLE_COMPONENTS_ERROR_MSG = 'Your model\'s graph has more than one single connected component.\nMake sure to solve this problem by connecting all graph components correctly.'
 
 MODEL_GRAPH_CYCLE_ERROR_MSG = 'Your model\'s graph has one or more cycles.\nMake sure to solve this problem by remove any cycle in your graph.'
+
+MODEL_GRAPH_ROOT_NODE_IS_NOT_INPUT_ERROR_MSG = 'Your model\'s graph has one or more root nodes that are not input layers.\nMake sure to solve this problem by changing all root nodes to input layers.'

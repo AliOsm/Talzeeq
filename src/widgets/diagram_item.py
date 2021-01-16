@@ -21,10 +21,11 @@ class DiagramItem(QGraphicsPolygonItem):
         self.arrows = list()
         self.framework_layer = framework_layer
         self.context_menu = context_menu
+        self.polygon = self.framework_layer.layer_image()
 
         self.create_text_item()
 
-        self.setPolygon(self.framework_layer.layer_image())
+        self.setPolygon(self.polygon)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
